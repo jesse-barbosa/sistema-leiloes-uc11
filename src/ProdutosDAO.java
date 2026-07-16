@@ -67,6 +67,57 @@ public class ProdutosDAO {
 
         return produtos;
     }
+
+    public boolean venderProduto(int id) {
+        String sql = "UPDATE produtos SET status = ? WHERE id = ? AND status <> ?";
+        conn = new conectaDAO().connectDB();
+
+        if (conn == null) {
+            return false;
+        }
+
+        try (Connection connection = conn;
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, "Vendido");
+            statement.setInt(2, id);
+            statement.setString(3, "Vendido");
+
+            return statement.executeUpdate() == 1;
+        } catch (SQLException erro) {
+            System.err.println("Erro ao vender produto: " + erro.getMessage());
+            return false;
+        }
+    }
+
+    public ArrayList<ProdutosDTO> listarProdutosVendidos() {
+        String sql = "SELECT id, nome, valor, status FROM produtos WHERE status = ? ORDER BY id";
+        ArrayList<ProdutosDTO> produtosVendidos = new ArrayList<>();
+        conn = new conectaDAO().connectDB();
+
+        if (conn == null) {
+            return produtosVendidos;
+        }
+
+        try (Connection connection = conn;
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, "Vendido");
+
+            try (ResultSet resultado = statement.executeQuery()) {
+                while (resultado.next()) {
+                    ProdutosDTO produto = new ProdutosDTO();
+                    produto.setId(resultado.getInt("id"));
+                    produto.setNome(resultado.getString("nome"));
+                    produto.setValor(resultado.getInt("valor"));
+                    produto.setStatus(resultado.getString("status"));
+                    produtosVendidos.add(produto);
+                }
+            }
+        } catch (SQLException erro) {
+            System.err.println("Erro ao listar produtos vendidos: " + erro.getMessage());
+        }
+
+        return produtosVendidos;
+    }
     
     
     
