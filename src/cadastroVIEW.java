@@ -7,6 +7,8 @@
  *
  * @author Adm
  */
+import javax.swing.JOptionPane;
+
 public class cadastroVIEW extends javax.swing.JFrame {
 
     /**
@@ -140,16 +142,60 @@ public class cadastroVIEW extends javax.swing.JFrame {
     }//GEN-LAST:event_cadastroNomeActionPerformed
 
     private void btnCadastrarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCadastrarActionPerformed
-        ProdutosDTO produto = new ProdutosDTO();
-        String nome = cadastroNome.getText();
-        String valor = cadastroValor.getText();
-        String status = "A Venda";
-        produto.setNome(nome);
-        produto.setValor(Integer.parseInt(valor));
-        produto.setStatus(status);
-        
-        ProdutosDAO produtodao = new ProdutosDAO();
-        produtodao.cadastrarProduto(produto);
+        String nome = cadastroNome.getText().trim();
+        String valorInformado = cadastroValor.getText().trim();
+
+        if (nome.isEmpty() || valorInformado.isEmpty()) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Informe o nome e o valor do produto.",
+                    "Campos obrigatórios",
+                    JOptionPane.WARNING_MESSAGE
+            );
+            return;
+        }
+
+        try {
+            int valor = Integer.parseInt(valorInformado);
+
+            if (valor <= 0) {
+                throw new NumberFormatException();
+            }
+
+            ProdutosDTO produto = new ProdutosDTO();
+            produto.setNome(nome);
+            produto.setValor(valor);
+            produto.setStatus("A Venda");
+
+            ProdutosDAO produtodao = new ProdutosDAO();
+            boolean cadastrado = produtodao.cadastrarProduto(produto);
+
+            if (cadastrado) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Produto cadastrado com sucesso!",
+                        "Cadastro realizado",
+                        JOptionPane.INFORMATION_MESSAGE
+                );
+                cadastroNome.setText("");
+                cadastroValor.setText("");
+                cadastroNome.requestFocus();
+            } else {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Não foi possível cadastrar o produto.",
+                        "Erro no cadastro",
+                        JOptionPane.ERROR_MESSAGE
+                );
+            }
+        } catch (NumberFormatException erro) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Informe um valor numérico maior que zero.",
+                    "Valor inválido",
+                    JOptionPane.WARNING_MESSAGE
+            );
+        }
         
     }//GEN-LAST:event_btnCadastrarActionPerformed
 
